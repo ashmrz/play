@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spy Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes pulse-bg {
+            0%, 100% { background-color: rgba(255, 255, 255, 0.1); }
+            50% { background-color: rgba(255, 255, 255, 0.2); }
+        }
+        .pulse-bg {
+            animation: pulse-bg 2s infinite;
+        }
+        .hidden-word {
+            background-color: #6b7280;
+            color: #6b7280;
+            user-select: none;
+        }
+        .hidden-word.revealed {
+            background-color: transparent;
+            color: black;
+        }
+        .farsi-text {
+            direction: rtl;
+            font-family: 'Vazirmatn', sans-serif;
+        }
+        .farsi-text .grid-cols-2 {
+            grid-template-columns: repeat(2, minmax(0, 1fr)); /* Explicitly set grid columns for RTL */
+        }
+        .farsi-text label {
+            margin-right: 0.5rem; /* Adjust label margin for RTL */
+            margin-left: 0;
+        }
+        .farsi-text .mr-2 {
+            margin-right: 0;
+            margin-left: 0.5rem; /* Adjust checkbox margin for RTL */
+        }
+        .farsi-text .mb-3 > span {
+            display: block; /* Ensure labels are block in RTL for correct alignment */
+        }
+
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vazirmatn@33.0.3/Vazirmatn-font-face.css">
+</head>
+<body class="bg-gray-50 font-sans antialiased">
+    <div class="min-h-screen flex flex-col justify-center items-center py-12 sm:py-24 px-4">
+        <div id="language-section" class="bg-white shadow-lg rounded-2xl px-10 pt-8 pb-10 mb-6 w-full max-w-md transition-opacity duration-500">
+            <h2 class="text-3xl font-semibold text-gray-800 mb-8 text-center">
+                <span id="language-select-heading">Select Language / انتخاب زبان</span>
+            </h2>
+            <div class="flex justify-center space-x-6 mb-8">
+                <button class="bg-blue-400 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-xl focus:outline-none focus:shadow-outline transition-colors duration-300" >
+                    <span onclick="selectLanguage('en')">English</span>
+                </button>
+                <button class="bg-blue-400 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-xl focus:outline-none focus:shadow-outline transition-colors duration-300 farsi-text">
+                    <span onclick="selectLanguage('fa')">فارسی</span>
+                </button>
+            </div>
+        </div>
+
+<div id="setup-section" class="bg-white shadow-lg rounded-2xl px-10 pt-8 pb-10 mb-6 w-full max-w-md transition-opacity duration-500 hidden">
+        <h2 class="text-3xl font-semibold text-gray-800 mb-8 text-center">
+            <span id="setup-heading">Spy Game Setup</span>
+        </h2>
+        <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-bold mb-3">
+                <span id="players-label" for="players">Number of Players</span>
+            </label>
+            <input class="shadow appearance-none border rounded-xl w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="players" type="number" placeholder="e.g., 4" min="2" value="4">
+        </div>
+        <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-bold mb-3">
+                <span id="spies-label" for="spies">Number of Spies</span>
+            </label>
+            <input class="shadow appearance-none border rounded-xl w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="spies" type="number" placeholder="e.g., 1" min="1" value="1">
+        </div>
+        <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-bold mb-3">
+                <span id="time-label" for="time">Time per Round (minutes)</span>
+            </label>
+            <input class="shadow appearance-none border rounded-xl w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="time" type="number" placeholder="e.g., 3" min="1" value="3">
+        </div>
+        <div class="mb-6">
+            <div class="flex items-center">
+                <input id="show-clue-spy" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                <label for="show-clue-spy" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300" id="show-clue-spy-label">Show Clue to Spy</label>
+            </div>
+        </div>
+        <div class="mb-8">
+            <div class="flex items-center justify-start">
+                <label class="block text-gray-700 text-sm font-bold mb-3">
+                    <span id="categories-label">Categories</span>
+                </label>
+            </div>
+            <div class="flex items-center justify-start">
+                <div class="flex items-center mb-3">
+                    <input id="select-all-categories" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                    <label for="select-all-categories" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300" id="select-all-categories-label">Select All</label>
+                </div>
+            </div>
+            <div id="categories-section" class="grid grid-cols-2 gap-2">
+            </div>
+        </div>
+        <div class="flex items-center justify-center">
+            <button class="bg-blue-400 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-xl focus:outline-none focus:shadow-outline transition-colors duration-300" type="button" id="start-button" onclick="startGame()">
+                Start Game
+            </button>
+        </div>
+    </div>
+
+<div id="game-section" class="bg-white shadow-lg rounded-2xl px-10 pt-8 pb-10 mb-6 w-full max-w-md text-center hidden transition-opacity duration-500" style="opacity: 0;">
+    <div id="player-turn" class="mb-8" style="height: 150px;"> <!-- Fixed height -->
+        <h3 class="text-2xl font-semibold text-gray-800 mb-4">
+            <span id="player-name">Player 1's Turn</span>
+        </h3>
+        <div id="role-container" class="relative">
+            <div id="role-cover" onclick="revealRole()" class="bg-gray-200 rounded-xl p-8 cursor-pointer hover:bg-gray-300 transition-colors duration-300">
+                <span class="text-lg font-bold text-gray-700" id="tap-to-reveal-button">Tap to Reveal</span>
+            </div>
+            <div id="role-content" class="absolute top-0 left-0 w-full h-full flex items-center justify-center rounded-xl hidden bg-gray-100">
+                <p id="role-text" class="text-xl font-bold text-gray-500"></p>
+            </div>
+        </div>
+    </div>
+    <div id="timer-section" class="hidden mb-8" style="height: 150px;"> <!-- Fixed height -->
+        <h3 class="text-2xl font-semibold text-gray-800 mb-4">
+            <span id="time-remaining">Time Remaining</span>
+        </h3>
+        <div id="timer" class="text-5xl font-bold text-red-400"></div>
+        <button id="end-game-button" onclick="endGame()" class="hidden bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-8 rounded-xl focus:outline-none focus:shadow-outline transition-colors duration-300 mt-4">
+            <span id="end-game-button-text">End Game</span>
+        </button>
+    </div>
+</div>
+
+<script>
+    const setupSection = document.getElementById('setup-section');
+    const gameSection = document.getElementById('game-section');
+    const languageSection = document.getElementById('language-section');
+    const playerNameDisplay = document.getElementById('player-name');
+    const roleCover = document.getElementById('role-cover');
+    const roleContent = document.getElementById('role-content');
+    const roleTextDisplay = document.getElementById('role-text');
+    const timerSection = document.getElementById('timer-section');
+    const timerDisplay = document.getElementById('timer');
+    const playerTurnSection = document.getElementById('player-turn');
+    const categoriesSection = document.getElementById('categories-section');
+    const showClueSpyCheckboxLabel = document.getElementById('show-clue-spy-label');
+    const endGameButton = document.getElementById('end-game-button');
+    const endGameButtonText = document.getElementById('end-game-button-text');
+    const selectAllCategoriesCheckbox = document.getElementById('select-all-categories');
+    const selectAllCategoriesLabel = document.getElementById('select-all-categories-label');
+
+
+    // Language Elements
+    const languageSelectHeading = document.getElementById('language-select-heading');
+    const setupHeading = document.getElementById('setup-heading');
+    const playersLabel = document.getElementById('players-label');
+    const spiesLabel = document.getElementById('spies-label');
+    const timeLabel = document.getElementById('time-label');
+    const categoriesLabel = document.getElementById('categories-label');
+    const startButton = document.getElementById('start-button');
+    const tapToRevealButton = document.getElementById('tap-to-reveal-button');
+    const timeRemaining = document.getElementById('time-remaining');
+
+
+    let numPlayers, numSpies, roundTime, selectedCategories, showClueToSpy;
+    let playerRoles = [];
+    let currentPlayerIndex = 0;
+    let gameStarted = false;
+    let timerInterval;
+    let timeLeft;
+    let wordsData;
+    let currentWord = "";
+    let currentCategory = "";
+    let roleRevealed = false;
+    let currentLanguage = 'en';
+
+    const languageText = {
+        en: {
+            "language-select-heading": "Select Language",
+            "setup-heading": "Spy Game Setup",
+            "players-label": "Number of Players",
+            "spies-label": "Number of Spies",
+            "time-label": "Time per Round (minutes)",
+            "categories-label": "Categories",
+            "start-button": "Start Game",
+            "player-turn": "Player %PLAYER_NUMBER%'s Turn",
+            "tap-to-reveal-button": "Tap to Reveal",
+            "time-remaining": "Time Remaining",
+            "spy-role": "SPY!",
+            "tap-to-hide-button": "Tap to Hide",
+            "game-over": "Game Over!",
+            "return-setup": "Return to Setup",
+            "show-clue-spy-label": "Show the category to Spy",
+            "end-game-button-text": "End Game",
+            "select-all-categories-label": "Select All"
+        },
+        fa: {
+            "language-select-heading": "انتخاب زبان",
+            "setup-heading": "تنظیمات بازی جاسوسی",
+            "players-label": "تعداد بازیکنان",
+            "spies-label": "تعداد جاسوس‌ها",
+            "time-label": "زمان هر دور (دقیقه)",
+            "categories-label": "دسته‌ها",
+            "start-button": "شروع بازی",
+            "player-turn": "نوبت بازیکن %PLAYER_NUMBER%",
+            "tap-to-reveal-button": "نمایش کلمه",
+            "time-remaining": "زمان باقی مانده",
+            "spy-role": "جاسوس!",
+            "tap-to-hide-button": "بزنید تا پنهان شود",
+            "game-over": "بازی تمام شد!",
+            "return-setup": "بازگشت به تنظیمات",
+            "show-clue-spy-label": "نمایش دسته‌بندی به جاسوس",
+            "end-game-button-text": "پایان بازی",
+            "select-all-categories-label": "انتخاب همه"
+        }
+    };
+
+
+    function selectLanguage(lang) {
+        currentLanguage = lang;
+        updateTextForLanguage(lang);
+        languageSection.classList.add('hidden');
+        setupSection.classList.remove('hidden');
+        loadWordsData(lang);
+    }
+
+    function updateTextForLanguage(lang) {
+        const text = languageText[lang];
+        languageSelectHeading.textContent = text["language-select-heading"];
+        setupHeading.textContent = text["setup-heading"];
+        playersLabel.textContent = text["players-label"];
+        spiesLabel.textContent = text["spies-label"];
+        timeLabel.textContent = text["time-label"];
+        categoriesLabel.textContent = text["categories-label"];
+        startButton.textContent = text["start-button"];
+        tapToRevealButton.textContent = text["tap-to-reveal-button"];
+        timeRemaining.textContent = text["time-remaining"];
+        showClueSpyCheckboxLabel.textContent = text["show-clue-spy-label"];
+        endGameButtonText.textContent = text["end-game-button-text"];
+        selectAllCategoriesLabel.textContent = text["select-all-categories-label"];
+
+
+        if (lang === 'fa') {
+            document.body.classList.add('farsi-text');
+            startButton.classList.add('farsi-text');
+            tapToRevealButton.classList.add('farsi-text');
+            showClueSpyCheckboxLabel.classList.add('farsi-text');
+            endGameButton.classList.add('farsi-text');
+            selectAllCategoriesLabel.classList.add('farsi-text');
+        } else {
+            document.body.classList.remove('farsi-text');
+            startButton.classList.remove('farsi-text');
+            tapToRevealButton.classList.remove('farsi-text');
+            showClueSpyCheckboxLabel.classList.remove('farsi-text');
+            endGameButton.classList.remove('farsi-text');
+            selectAllCategoriesLabel.classList.remove('farsi-text');
+        }
+    }
+
+
+    function loadWordsData(lang) {
+        const jsonFile = lang === 'fa' ? 'words_farsi.json' : 'words.json';
+        // Add cache-busting timestamp to the URL
+        fetch(jsonFile + '?t=' + Date.now())
+            .then(response => response.json())
+            .then(data => {
+                wordsData = data;
+                populateCategories();
+            })
+            .catch(error => {
+                console.error(`Error loading ${jsonFile}:`, error);
+                alert(`Failed to load game data for ${lang}. Please ensure ${jsonFile} is in the same directory and refresh the page.`);
+            });
+    }
+
+    loadWordsData('en');
+    updateTextForLanguage('en');
+
+
+    function populateCategories() {
+        if (!wordsData) return;
+        categoriesSection.innerHTML = ``;
+
+
+        const selectAllCheckbox = document.getElementById('select-all-categories');
+        selectAllCheckbox.addEventListener('change', function() {
+            const categoryCheckboxes = document.querySelectorAll('#categories-section input[name="category"]');
+            categoryCheckboxes.forEach(checkbox => {
+                checkbox.checked = selectAllCheckbox.checked;
+            });
+        });
+
+
+        let isFirstCategory = true;
+        for (const categoryName in wordsData) {
+            if (wordsData.hasOwnProperty(categoryName) && categoryName !== "All") {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.classList.add('flex', 'items-center', 'mb-0');
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = `category-${categoryName.replace(/\s+/g, '-')}`;
+                checkbox.name = 'category';
+                checkbox.value = categoryName;
+                checkbox.classList.add('mr-2');
+                checkbox.checked = isFirstCategory;
+                isFirstCategory = false;
+
+                const label = document.createElement('label');
+                label.setAttribute('for', `category-${categoryName.replace(/\s+/g, '-')}`);
+                label.textContent = categoryName;
+                if (currentLanguage === 'fa') {
+                    label.classList.add('farsi-text');
+                }
+
+
+                categoryDiv.appendChild(checkbox);
+                categoryDiv.appendChild(label);
+                categoriesSection.appendChild(categoryDiv);
+            }
+        }
+    }
+
+
+    function startGame() {
+        if (!wordsData) {
+            alert(languageText[currentLanguage]["game-data-not-loaded"] || 'Game data not loaded yet. Please wait and try again.');
+            return;
+        }
+        numPlayers = parseInt(document.getElementById('players').value);
+        numSpies = parseInt(document.getElementById('spies').value);
+        roundTime = parseInt(document.getElementById('time').value);
+        showClueToSpy = document.getElementById('show-clue-spy').checked;
+
+        selectedCategories = Array.from(document.querySelectorAll('#categories-section input[name="category"]:checked'))
+            .map(checkbox => checkbox.value);
+
+        if (numSpies >= numPlayers) {
+            alert(languageText[currentLanguage]["spies-less-than-players"] || "Number of spies must be less than the number of players.");
+            return;
+        }
+
+        generateRolesAndWord();
+        currentPlayerIndex = 0;
+        gameStarted = true;
+        roleRevealed = false;
+
+        setupSection.style.opacity = '0';
+        setTimeout(() => {
+            setupSection.classList.add('hidden');
+            gameSection.classList.remove('hidden');
+            setTimeout(() => {
+                gameSection.style.opacity = '1';
+                startPlayerTurn();
+            }, 100);
+        }, 500);
+    }
+
+    function generateRolesAndWord() {
+        playerRoles = Array(numPlayers).fill("Word Holder");
+        let spyIndices = [];
+        while (spyIndices.length < numSpies) {
+            let randomIndex = Math.floor(Math.random() * numPlayers);
+            if (!spyIndices.includes(randomIndex)) {
+                spyIndices.push(randomIndex);
+            }
+        }
+        spyIndices.forEach(index => playerRoles[index] = "Spy");
+
+        let availableWords = {};
+        if (selectedCategories.length === 0) {
+            availableWords = wordsData;
+        } else {
+            selectedCategories.forEach(cat => {
+                if (wordsData[cat]) {
+                    availableWords[cat] = wordsData[cat];
+                }
+            });
+        }
+
+        let combinedCategoriesAndWords = [];
+        for (const category in availableWords) {
+            availableWords[category].forEach(word => {
+                combinedCategoriesAndWords.push({ category: category, word: word });
+            });
+        }
+
+
+        if (combinedCategoriesAndWords.length === 0) {
+            let allWordsCombined = [];
+             for (const category in wordsData) {
+                if (category !== "All") {
+                    allWordsCombined = allWordsCombined.concat(wordsData[category]);
+                }
+             }
+            if (allWordsCombined.length > 0) {
+                const randomWord = allWordsCombined[Math.floor(Math.random() * allWordsCombined.length)];
+                currentWord = { word: randomWord, category: "Miscellaneous" };
+            } else {
+                alert(languageText[currentLanguage]["no-words-available"] || "No words available for the selected categories. Please select different categories or ensure words.json is correctly populated.");
+                return;
+            }
+
+
+        } else {
+            const randomCategoryWord = combinedCategoriesAndWords[Math.floor(Math.random() * combinedCategoriesAndWords.length)];
+            currentWord = { word: randomCategoryWord.word, category: randomCategoryWord.category };
+        }
+    }
+
+    function startPlayerTurn() {
+        playerTurnSection.classList.remove('hidden');
+        playerNameDisplay.textContent = languageText[currentLanguage]["player-turn"].replace('%PLAYER_NUMBER%', currentPlayerIndex + 1) || `Player ${currentPlayerIndex + 1}'s Turn`;
+        roleCover.classList.remove('hidden');
+        roleContent.classList.add('hidden');
+        roleRevealed = false;
+    }
+
+    function revealRole() {
+        if (roleRevealed) {
+            hideRole();
+            return;
+        }
+
+        roleRevealed = true;
+        roleCover.classList.add('hidden');
+        roleContent.classList.remove('hidden');
+
+        let role = playerRoles[currentPlayerIndex];
+        if (role === "Spy") {
+            let spyRoleText = languageText[currentLanguage]["spy-role"] || "SPY!";
+            if (showClueToSpy) {
+                roleTextDisplay.innerHTML = `
+                    <p class="text-xl font-bold text-gray-500">${spyRoleText} (${currentWord.category})</p>
+                `;
+            } else {
+                roleTextDisplay.textContent = spyRoleText;
+            }
+        } else {
+            roleTextDisplay.textContent = currentWord.word;
+        }
+        tapToRevealButton.textContent = languageText[currentLanguage]["tap-to-hide-button"] || "Tap to Hide";
+    }
+
+    function hideRole() {
+        roleRevealed = false;
+        roleCover.classList.remove('hidden');
+        roleContent.classList.add('hidden');
+        tapToRevealButton.textContent = languageText[currentLanguage]["tap-to-reveal-button"] || "Tap to Reveal";
+
+        currentPlayerIndex++;
+        if (currentPlayerIndex === numPlayers) {
+            startTimer();
+        } else if (currentPlayerIndex < numPlayers) {
+            startPlayerTurn();
+        }
+    }
+
+
+    function startTimer() {
+        timerSection.classList.remove('hidden');
+        playerTurnSection.classList.add('hidden');
+        timeLeft = roundTime * 60;
+        updateTimerDisplay();
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            updateTimerDisplay();
+            if (timeLeft <= 0) {
+                endRound();
+            }
+        }, 1000);
+        endGameButton.classList.remove('hidden'); // Show end game button when timer starts
+    }
+
+    function updateTimerDisplay() {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    function endRound() {
+        clearInterval(timerInterval);
+        timerSection.classList.add('hidden');
+        endGameButton.classList.add('hidden'); // Hide end game button when round ends
+        gameSection.style.opacity = '0';
+        setTimeout(() => {
+            gameSection.classList.add('hidden');
+            setupSection.classList.remove('hidden');
+            setTimeout(() => {
+                setupSection.style.opacity = '1';
+                setupSection.style.opacity = '1';
+            }, 100);
+        }, 500);
+
+        document.getElementById('players').value = numPlayers;
+        document.getElementById('spies').value = numSpies;
+        document.getElementById('time').value = roundTime;
+        populateCategories();
+    }
+
+    function endGame() {
+        clearInterval(timerInterval); // Stop the timer
+        timerSection.classList.add('hidden'); // Hide timer section
+        endGameButton.classList.add('hidden'); // Hide end game button
+        gameSection.style.opacity = '0'; // Fade out game section
+        setTimeout(() => {
+            gameSection.classList.add('hidden'); // Hide game section
+            setupSection.classList.remove('hidden'); // Show setup section
+            setTimeout(() => {
+                setupSection.style.opacity = '1'; // Fade in setup section
+            }, 100);
+        }, 500);
+    }
+
+
+    gameSection.addEventListener('click', function(event) {
+        if (gameStarted && !timerSection.classList.contains('hidden')) {
+            return;
+        }
+
+        if (gameStarted && timerSection.classList.contains('hidden') && !event.target.closest('#role-container')) {
+            if (roleRevealed) {
+                hideRole();
+            } else if (!roleCover.classList.contains('hidden')) {
+                revealRole();
+            }
+        }
+    });
+
+</script>
+
+<script>
+    // Modified populateCategories function to remove mb-2 class
+    function populateCategories() {
+        if (!wordsData) return;
+        categoriesSection.innerHTML = ``;
+
+        const selectAllCheckbox = document.getElementById('select-all-categories');
+        selectAllCheckbox.addEventListener('change', function() {
+            const categoryCheckboxes = document.querySelectorAll('#categories-section input[name="category"]');
+            categoryCheckboxes.forEach(checkbox => {
+                checkbox.checked = selectAllCheckbox.checked;
+            });
+        });
+
+
+        let isFirstCategory = true;
+        for (const categoryName in wordsData) {
+            if (wordsData.hasOwnProperty(categoryName) && categoryName !== "All") {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.classList.add('flex', 'items-center', 'mb-0');
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = `category-${categoryName.replace(/\s+/g, '-')}`;
+                checkbox.name = 'category';
+                checkbox.value = categoryName;
+                checkbox.classList.add('mr-2');
+                checkbox.checked = isFirstCategory;
+                isFirstCategory = false;
+
+                const label = document.createElement('label');
+                label.setAttribute('for', `category-${categoryName.replace(/\s+/g, '-')}`);
+                label.textContent = categoryName;
+                if (currentLanguage === 'fa') {
+                    label.classList.add('farsi-text');
+                }
+
+
+                categoryDiv.appendChild(checkbox);
+                categoryDiv.appendChild(label);
+                categoriesSection.appendChild(categoryDiv);
+            }
+        }
+    }
+</script>
+
+</body>
+</html>
