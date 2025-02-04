@@ -51,10 +51,10 @@
                 <span id="language-select-heading">Select Language / انتخاب زبان</span>
             </h2>
             <div class="flex justify-center space-x-6 mb-8">
-                <button class="bg-blue-400 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-xl focus:outline-none focus:shadow-outline transition-colors duration-300" >
+                <button class="bg-blue-400 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-xl focus:outline-none focus:shadow-outline transition-colors duration-300 flex items-center justify-center" >
                     <span onclick="selectLanguage('en')">English</span>
                 </button>
-                <button class="bg-blue-400 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-xl focus:outline-none focus:shadow-outline transition-colors duration-300 farsi-text">
+                <button class="bg-blue-400 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-xl focus:outline-none focus:shadow-outline transition-colors duration-300 farsi-text flex items-center justify-center">
                     <span onclick="selectLanguage('fa')">فارسی</span>
                 </button>
             </div>
@@ -116,15 +116,15 @@
             <span id="player-name">Player 1's Turn</span>
         </h3>
         <div id="role-container" class="relative">
-            <div id="role-cover" onclick="revealRole()" class="bg-gray-200 rounded-xl p-8 cursor-pointer hover:bg-gray-300 transition-colors duration-300">
+            <div id="role-cover" onclick="revealRole()" class="bg-gray-200 rounded-xl p-8 cursor-pointer hover:bg-gray-300 transition-colors duration-300 flex items-center justify-center">
                 <span class="text-lg font-bold text-gray-700" id="tap-to-reveal-button">Tap to Reveal</span>
             </div>
-            <div id="role-content" class="absolute top-0 left-0 w-full h-full flex items-center justify-center rounded-xl hidden bg-gray-100">
+            <div id="role-content" onclick="hideRole()" class="absolute top-0 left-0 w-full h-full flex items-center justify-center rounded-xl hidden bg-white border-gray-300 border-2">
                 <p id="role-text" class="text-xl font-bold text-gray-500"></p>
             </div>
         </div>
     </div>
-    <div id="timer-section" class="hidden mb-8" style="height: 150px;"> <!-- Fixed height -->
+    <div id="timer-section" class="hidden mb-8 flex flex-col items-center" style="height: 150px;"> <!-- Fixed height and flex alignment -->
         <h3 class="text-2xl font-semibold text-gray-800 mb-4">
             <span id="time-remaining">Time Remaining</span>
         </h3>
@@ -426,7 +426,7 @@
         }
 
         roleRevealed = true;
-        roleCover.classList.add('hidden');
+        //roleCover.classList.add('hidden'); // REMOVED
         roleContent.classList.remove('hidden');
 
         let role = playerRoles[currentPlayerIndex];
@@ -447,7 +447,7 @@
 
     function hideRole() {
         roleRevealed = false;
-        roleCover.classList.remove('hidden');
+        //roleCover.classList.remove('hidden'); // REMOVED
         roleContent.classList.add('hidden');
         tapToRevealButton.textContent = languageText[currentLanguage]["tap-to-reveal-button"] || "Tap to Reveal";
 
