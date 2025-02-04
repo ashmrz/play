@@ -7,20 +7,21 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @keyframes pulse-bg {
-            0%, 100% { background-color: rgba(255, 255, 255, 0.1); }
-            50% { background-color: rgba(255, 255, 255, 0.2); }
+            0%, 100% { background-color: rgba(245, 245, 245, 0.3); } /* Off-white pulse */
+            50% { background-color: rgba(245, 245, 245, 0.5); }
         }
         .pulse-bg {
             animation: pulse-bg 2s infinite;
         }
         .hidden-word {
-            background-color: #6b7280;
-            color: #6b7280;
+            background-color: #9ca3af; /* Gray-400 */
+            color: #9ca3af; /* Gray-400 */
             user-select: none;
+            transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition */
         }
         .hidden-word.revealed {
             background-color: transparent;
-            color: black;
+            color: #1e293b; /* Gray-800, darker text for revealed word */
         }
         .farsi-text {
             direction: rtl;
@@ -30,106 +31,122 @@
             grid-template-columns: repeat(2, minmax(0, 1fr)); /* Explicitly set grid columns for RTL */
         }
         .farsi-text label {
-            margin-right: 0.5rem; /* Adjust label margin for RTL */
+            margin-right: 0.75rem; /* Increased margin for RTL labels */
             margin-left: 0;
         }
         .farsi-text .mr-2 {
             margin-right: 0;
-            margin-left: 0.5rem; /* Adjust checkbox margin for RTL */
+            margin-left: 0.75rem; /* Increased margin for RTL checkbox */
         }
         .farsi-text .mb-3 > span {
             display: block; /* Ensure labels are block in RTL for correct alignment */
         }
+        /* Custom button style for hover effect */
+        .custom-button:hover {
+            transform: translateY(-2px); /* Slightly move up on hover */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Slightly stronger shadow on hover */
+        }
+         /* Deeper shadow for cards */
+        .shadow-lg {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        /* More pronounced focus ring */
+        .focus-within\:ring-2 {
+            --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+            --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+            box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+        }
+
 
     </style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vazirmatn@33.0.3/Vazirmatn-font-face.css">
 </head>
-<body class="bg-gray-50 font-sans antialiased">
-    <div class="min-h-screen flex flex-col justify-center items-center py-12 sm:py-24 px-4">
-        <div id="language-section" class="bg-white shadow-lg rounded-2xl px-10 pt-8 pb-10 mb-6 w-full max-w-md transition-opacity duration-500">
-            <h2 class="text-3xl font-semibold text-gray-800 mb-8 text-center">
+<body class="bg-gray-100 font-sans antialiased text-gray-800"> <!-- Light gray body background, kept for contrast with white cards -->
+    <div class="min-h-screen flex flex-col justify-center items-center py-12 sm:py-24 px-4 bg-white"> <!-- Solid white background -->
+        <div id="language-section" class="bg-white shadow-lg rounded-2xl px-12 pt-10 pb-12 mb-8 w-full max-w-md transition-opacity duration-500"> <!-- Increased padding on cards -->
+            <h2 class="text-3xl font-semibold text-gray-900 mb-8 text-center"> <!-- Darker heading text -->
                 <span id="language-select-heading">Select Language / انتخاب زبان</span>
             </h2>
             <div class="flex justify-center space-x-6 mb-8">
-                <button class="bg-blue-400 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-xl focus:outline-none focus:shadow-outline transition-colors duration-300 flex items-center justify-center" >
+                <button class="custom-button bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-3 px-6 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-opacity-75 transition-colors duration-300 flex items-center justify-center"> <!-- Off-white buttons, more neutral -->
                     <span onclick="selectLanguage('en')">English</span>
                 </button>
-                <button class="bg-blue-400 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-xl focus:outline-none focus:shadow-outline transition-colors duration-300 farsi-text flex items-center justify-center">
+                <button class="custom-button bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-3 px-6 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-opacity-75 transition-colors duration-300 farsi-text flex items-center justify-center">
                     <span onclick="selectLanguage('fa')">فارسی</span>
                 </button>
             </div>
         </div>
 
-<div id="setup-section" class="bg-white shadow-lg rounded-2xl px-10 pt-6 pb-6 mb-4 w-full max-w-md transition-opacity duration-500 hidden">
-        <h2 class="text-3xl font-semibold text-gray-800 mb-4 text-center">
+<div id="setup-section" class="bg-white shadow-lg rounded-2xl px-12 pt-8 pb-10 mb-8 w-full max-w-md transition-opacity duration-500 hidden"> <!-- Increased padding on cards -->
+        <h2 class="text-3xl font-semibold text-gray-900 mb-6 text-center"> <!-- Darker heading text, reduced margin -->
             <span id="setup-heading">Spy Game Setup</span>
         </h2>
-        <div class="mb-3">
-            <label class="block text-gray-700 text-sm font-bold mb-3">
+        <div class="mb-4"> <!-- Reduced margin -->
+            <label class="block text-gray-700 text-sm font-medium mb-2"> <!-- Medium font weight labels -->
                 <span id="players-label" for="players">Number of Players</span>
             </label>
-            <input class="shadow appearance-none border rounded-xl w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="players" type="number" placeholder="e.g., 4" min="2" value="4">
+            <input class="shadow-sm appearance-none border rounded-xl w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-gray-300" id="players" type="number" placeholder="e.g., 4" min="2" value="4"> <!-- Lighter shadow, focus ring -->
         </div>
-        <div class="mb-3">
-            <label class="block text-gray-700 text-sm font-bold mb-3">
+        <div class="mb-4"> <!-- Reduced margin -->
+            <label class="block text-gray-700 text-sm font-medium mb-2"> <!-- Medium font weight labels -->
                 <span id="spies-label" for="spies">Number of Spies</span>
             </label>
-            <input class="shadow appearance-none border rounded-xl w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="spies" type="number" placeholder="e.g., 1" min="1" value="1">
+            <input class="shadow-sm appearance-none border rounded-xl w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-gray-300" id="spies" type="number" placeholder="e.g., 1" min="1" value="1"> <!-- Lighter shadow, focus ring -->
         </div>
-        <div class="mb-3">
-            <label class="block text-gray-700 text-sm font-bold mb-3">
+        <div class="mb-4"> <!-- Reduced margin -->
+            <label class="block text-gray-700 text-sm font-medium mb-2"> <!-- Medium font weight labels -->
                 <span id="time-label" for="time">Time per Round (minutes)</span>
             </label>
-            <input class="shadow appearance-none border rounded-xl w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="time" type="number" placeholder="e.g., 3" min="1" value="3">
+            <input class="shadow-sm appearance-none border rounded-xl w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-gray-300" id="time" type="number" placeholder="e.g., 3" min="1" value="3"> <!-- Lighter shadow, focus ring -->
         </div>
-        <div class="mb-3">
+        <div class="mb-4"> <!-- Reduced margin -->
             <div class="flex items-center">
-                <input id="show-clue-spy" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-                <label for="show-clue-spy" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300" id="show-clue-spy-label">Show Clue to Spy</label>
+                <input id="show-clue-spy" type="checkbox" class="w-5 h-5 text-gray-500 bg-gray-100 border-gray-300 rounded focus:ring-2 focus:ring-gray-500"> <!-- Gray checkbox, larger size, focus ring -->
+                <label for="show-clue-spy" class="ml-3 text-sm font-medium text-gray-700" id="show-clue-spy-label">Show Clue to Spy</label> <!-- Medium font weight labels, increased margin -->
             </div>
         </div>
-        <div class="mb-3">
-            <div class="flex items-center justify-start">
-                <label class="block text-gray-700 text-sm font-bold mb-3">
+        <div class="mb-6"> <!-- Increased margin -->
+            <div class="flex items-center justify-start mb-2"> <!-- Added margin bottom to category label section -->
+                <label class="block text-gray-700 text-sm font-medium"> <!-- Medium font weight labels -->
                     <span id="categories-label">Categories</span>
                 </label>
             </div>
-            <div class="flex items-center justify-start">
-                <div class="flex items-center mb-3">
-                    <input id="select-all-categories" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-                    <label for="select-all-categories" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300" id="select-all-categories-label">Select All</label>
+            <div class="flex items-center justify-start mb-3"> <!-- Added margin bottom to "Select All" section -->
+                <div class="flex items-center">
+                    <input id="select-all-categories" type="checkbox" class="w-5 h-5 text-gray-500 bg-gray-100 border-gray-300 rounded focus:ring-2 focus:ring-gray-500"> <!-- Gray checkbox, larger size, focus ring -->
+                    <label for="select-all-categories" class="ml-3 text-sm font-medium text-gray-700" id="select-all-categories-label">Select All</label> <!-- Medium font weight labels, increased margin -->
                 </div>
             </div>
-            <div id="categories-section" class="grid grid-cols-2 gap-2">
+            <div id="categories-section" class="grid grid-cols-2 gap-3"> <!-- Increased gap in category grid -->
             </div>
         </div>
         <div class="flex items-center justify-center">
-            <button class="bg-blue-400 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-xl focus:outline-none focus:shadow-outline transition-colors duration-300" type="button" id="start-button" onclick="startGame()">
+            <button class="custom-button bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-3 px-8 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-opacity-75 transition-colors duration-300" type="button" id="start-button" onclick="startGame()"> <!-- Off-white button, more neutral -->
                 Start Game
             </button>
         </div>
     </div>
 
-<div id="game-section" class="bg-white shadow-lg rounded-2xl px-10 pt-8 pb-10 mb-6 w-full max-w-md text-center hidden transition-opacity duration-500" style="opacity: 0;">
-    <div id="player-turn" class="mb-8" style="height: 150px;"> <!-- Fixed height -->
-        <h3 class="text-2xl font-semibold text-gray-800 mb-4">
+<div id="game-section" class="bg-white shadow-lg rounded-2xl px-12 pt-10 pb-12 mb-8 w-full max-w-md text-center hidden transition-opacity duration-500" style="opacity: 0;"> <!-- Increased padding on cards -->
+    <div id="player-turn" class="mb-10" style="height: 150px;"> <!-- Increased margin, Fixed height -->
+        <h3 class="text-2xl font-semibold text-gray-900 mb-6"> <!-- Darker heading text, increased margin -->
             <span id="player-name">Player 1's Turn</span>
         </h3>
         <div id="role-container" class="relative">
-            <div id="role-cover" onclick="revealRole()" class="bg-gray-200 rounded-xl p-8 cursor-pointer hover:bg-gray-300 transition-colors duration-300 flex items-center justify-center">
-                <span class="text-lg font-bold text-gray-700" id="tap-to-reveal-button">Tap to Reveal</span>
+            <div id="role-cover" onclick="revealRole()" class="pulse-bg bg-gray-100 rounded-xl p-10 cursor-pointer hover:bg-gray-200 transition-colors duration-300 flex items-center justify-center"> <!-- Pulse background, lighter gray, increased padding -->
+                <span class="text-lg font-medium text-gray-700" id="tap-to-reveal-button">Tap to Reveal</span> <!-- Medium font weight -->
             </div>
-            <div id="role-content" onclick="hideRole()" class="absolute top-0 left-0 w-full h-full flex items-center justify-center rounded-xl hidden bg-white border-gray-300 border-2">
-                <p id="role-text" class="text-xl font-bold text-gray-500"></p>
+            <div id="role-content" onclick="hideRole()" class="absolute top-0 left-0 w-full h-full flex items-center justify-center rounded-xl hidden bg-white border-gray-200 border-2"> <!-- Lighter border -->
+                <p id="role-text" class="text-2xl font-bold text-gray-700"></p> <!-- Gray role text, larger size, more neutral -->
             </div>
         </div>
     </div>
-    <div id="timer-section" class="hidden mb-8 flex flex-col items-center" style="height: 150px;"> <!-- Fixed height and flex alignment -->
-        <h3 class="text-2xl font-semibold text-gray-800 mb-4">
+    <div id="timer-section" class="hidden mb-10 flex flex-col items-center" style="height: 150px;"> <!-- Increased margin, Fixed height and flex alignment -->
+        <h3 class="text-2xl font-semibold text-gray-900 mb-6"> <!-- Darker heading text, increased margin -->
             <span id="time-remaining">Time Remaining</span>
         </h3>
-        <div id="timer" class="text-5xl font-bold text-red-400"></div>
-        <button id="end-game-button" onclick="endGame()" class="hidden bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-8 rounded-xl focus:outline-none focus:shadow-outline transition-colors duration-300 mt-4">
+        <div id="timer" class="text-5xl font-bold text-red-500"></div> <!-- Red timer text -->
+        <button id="end-game-button" onclick="endGame()" class="hidden custom-button bg-red-500 hover:bg-red-600 text-white font-medium py-3 px-8 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-75 transition-colors duration-300 mt-6"> <!-- Red button, more modern style, increased margin -->
             <span id="end-game-button-text">End Game</span>
         </button>
     </div>
@@ -192,7 +209,6 @@
             "time-remaining": "Time Remaining",
             "spy-role": "SPY!",
             "game-over": "Game Over!",
-            "return-setup": "Return to Setup",
             "show-clue-spy-label": "Show the category to Spy",
             "end-game-button-text": "End Game",
             "select-all-categories-label": "Select All"
@@ -210,7 +226,6 @@
             "time-remaining": "زمان باقی مانده",
             "spy-role": "جاسوس!",
             "game-over": "بازی تمام شد!",
-            "return-setup": "بازگشت به تنظیمات",
             "show-clue-spy-label": "نمایش دسته‌بندی به جاسوس",
             "end-game-button-text": "پایان بازی",
             "select-all-categories-label": "انتخاب همه"
@@ -432,7 +447,7 @@
             let spyRoleText = languageText[currentLanguage]["spy-role"] || "SPY!";
             if (showClueToSpy) {
                 roleTextDisplay.innerHTML = `
-                    <p class="text-xl font-bold text-gray-500">${spyRoleText} (${currentWord.category})</p>
+                    <p class="text-2xl font-bold text-gray-700">${spyRoleText} (${currentWord.category})</p>
                 `;
             } else {
                 roleTextDisplay.textContent = spyRoleText;
